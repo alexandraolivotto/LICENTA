@@ -11,7 +11,6 @@ from sprite import AnimatedSprite
 from utils import Utils
 from exercise import Exercise
 
-
 interpreter = tf.lite.Interpreter(model_path='3.tflite')
 interpreter.allocate_tensors()
 EDGES = {
@@ -37,10 +36,10 @@ EDGES = {
 
 
 def start_webcam_capture():
-    capture = cv2.VideoCapture(0, cv2.CAP_V4L2)
-    capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-    capture.set(cv2.CAP_PROP_FPS, 30)
+    capture = cv2.VideoCapture(0)
+    capture.set(cv2.CAP_PROP_FRAME_WIDTH, 960)
+    capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 540)
+    # capture.set(cv2.CAP_PROP_FPS, 30)
     return capture
 
 
@@ -49,9 +48,18 @@ def start_video_capture(video_name):
     return capture
 
 
-def build_body(frame, keypoints_with_scores):
-    draw_connections(frame, keypoints_with_scores, EDGES, 0.4)
-    draw_keypoints(frame, keypoints_with_scores, 0.4)
+def build_frame_and_body(cap):
+    ret, frame = cap.read()
+    frame = cv2.flip(frame, 1)
+    if not ret:
+        print("Ignoring empty camera frame.")
+
+    img = frame.copy()
+    input_image = reshape_frame(img)
+    keypoints_with_scores = get_key_points(input_image)
+
+    draw_connections(frame, keypoints_with_scores, EDGES, 0.3)
+    draw_keypoints(frame, keypoints_with_scores, 0.3)
 
     keypoints_array = keypoints_with_scores[0][0]
     body = Body(**{name: keypoints_array[landmark]
@@ -97,40 +105,36 @@ def get_key_points(input_image):
     return keypoints_with_scores
 
 
-def get_body_and_display_frame(frame, keypoints, window):
-    frame, body = build_body(frame, keypoints)
+def get_body_and_display_frame(cap, window):
+    frame, body = build_frame_and_body(cap)
 
     # Uncomment to display angles
     Utils.display_angles(frame, body)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame_rgb = np.rot90(frame_rgb)
-    # frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
 
     img = pygame.surfarray.make_surface(frame_rgb).convert()
     img = pygame.transform.flip(img, True, False)
+    img = pygame.transform.scale(img, (1280, 1024))
     window.blit(img, (0, 0))
-
-    # Update the display
-    # pygame.display.flip()
 
     # Cap the frame rate
     clock.tick(Utils.fps)
     return body
 
 
-def start_exercise(exercise, cap, keypoints, window):
+def start_exercise(exercise, cap, window):
     timer = time.time()
     remaining_reps = exercise.reps
+    animation_frame_list = AnimatedSprite.loadGIF(exercise.image_url)
+    animated_sprite = AnimatedSprite(75, Utils.height, animation_frame_list)
+    all_sprites = pygame.sprite.Group(animated_sprite)
 
     last_print_time = time.time()
     while time.time() - timer < exercise.elapsed_time:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
                 pygame.quit()
-        success, frame = cap.read()
-        if not success:
-            print("Ignoring empty camera frame.")
-            continue
 
         current_time = time.time()
 
@@ -138,6 +142,7 @@ def start_exercise(exercise, cap, keypoints, window):
             print(f'Time remaining: {int(exercise.elapsed_time - (current_time - timer))}')
             last_print_time = current_time
 
+        exercise.body = get_body_and_display_frame(cap, window)
         completed, direction = exercise.check_conditions()
         if completed:
             remaining_reps -= 1
@@ -147,16 +152,19 @@ def start_exercise(exercise, cap, keypoints, window):
                 return
 
         exercise.direction = direction
-        exercise.body = get_body_and_display_frame(frame, keypoints, window)
+
+        all_sprites.update()
+        all_sprites.draw(window)
         pygame.display.flip()
 
 
 def main():
     pygame.init()
-    window = pygame.display
+    window = pygame.display.set_mode((1280, 1024))
     pygame.display.set_caption("MoveNet Lightning action recognition")
 
-    cap = start_video_capture('ex2.mp4')
+    # cap = start_video_capture('ex2.mp4')
+    cap = start_webcam_capture()
 
     if not cap.isOpened():
         print("Error: Could not open webcam/video.")
@@ -166,15 +174,7 @@ def main():
 
     try:
         while cap.isOpened() and running:
-            ret, frame = cap.read()
-            img = frame.copy()
-            h, w, c = img.shape
-            input_image = reshape_frame(img)
-            keypoints_with_scores = get_key_points(input_image)
-            # frame, body = build_body(frame, keypoints_with_scores)
-            #
-            # Utils.display_angles(frame, body)
-
+            body = get_body_and_display_frame(cap, window)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -185,24 +185,15 @@ def main():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                     print('Loading exercise...')
                     exercise = Exercise("Elbow bends", "./Resources/Woman doing Side Lunges.gif",
-                                False, True, 5, 30.0,
-                                body,
-                                conditions.left_elbow_bend_condition)
+                                        False, True, 5, 30.0,
+                                        body,
+                                        conditions.left_elbow_bend_condition)
                     print(f'Starting exercise: {exercise.name}')
                     print(
                         f'You have {exercise.elapsed_time} seconds to complete {exercise.reps} reps')
-                    start_exercise(exercise, cap, keypoints_with_scores, window.set_mode((w, h)))
+                    start_exercise(exercise, cap, window)
 
-                success, frame = cap.read()
-                if not success:
-                    print("Ignoring empty camera frame.")
-                    continue
-
-                body = get_body_and_display_frame(frame, keypoints_with_scores, window.set_mode((w,h)))
-                pygame.display.flip()
-            # cv2.imshow('MoveNet Lightning', frame)
-            # if cv2.waitKey(10) & 0xFF == ord('q'):
-            #     break
+            pygame.display.flip()
     finally:
         cap.release()
         cv2.destroyAllWindows()

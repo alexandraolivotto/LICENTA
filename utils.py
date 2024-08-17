@@ -1,8 +1,11 @@
 import numpy as np
 import cv2 as cv
 
+
 # Function to calculate the angle between three joints
 class Utils:
+    width = 1280
+    height = 1024
     fps = 30
 
     ORANGE_SHADE = (235, 94, 40)

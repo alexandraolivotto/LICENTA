@@ -11,7 +11,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.image_index = 0
 
     def update(self):
-        self.image_index += 2
+        self.image_index += 1
         if self.image_index >= len(self.images):
             self.image_index = 0
         self.image = self.images[self.image_index]
