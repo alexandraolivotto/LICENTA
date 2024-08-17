@@ -134,18 +134,18 @@ def draw_get_in_frame_border(window, is_standing):
 def check_if_body_in_frame(body, is_standing):
     if body is None:
         return False
-    # print(f' Nose: {body.nose}')
-    # print(f' Right heel: {body.right_heel}')
-    # print(f' Left heel: {body.left_heel}')
+    print(f' Nose: {body.nose}')
+    print(f' Right ankle: {body.right_ankle}')
+    print(f' Left ankle: {body.left_ankle}')
     if is_standing:
-        if (0.4 < body.nose[0] < 0.6 and 0.05 < body.nose[1] < 0.2
-                and 0.4 < body.right_heel[0] < 0.6 and 0.8 < body.right_heel[1] < 0.9
-                and 0.4 < body.left_heel[0] < 0.7 and 0.8 < body.left_heel[1] < 0.9):
+        if (0.6 > body.nose[1] > 0.4 > body.nose[0] > 0.1
+                and 0.4 < body.right_ankle[1] < 0.6 and 0.9 > body.right_ankle[0] > 0.7 > body.left_ankle[1] > 0.4
+                and 0.7 < body.left_ankle[0] < 0.9):
             return True
     else:
-        if (0.1 < body.nose[0] < 0.3 and 0.2 < body.nose[1] < 0.5
-                and 0.6 < body.right_heel[0] < 0.75
-                and 0.6 < body.right_heel[1] < 0.8):
+        if (0.2 < body.nose[0] < 0.8 and 0.2 < body.nose[1] < 0.5
+                and 0.2 < body.right_ankle[0] < 0.8
+                and 0.6 < body.right_ankle[1] < 0.8):
             return True
 
     return False
@@ -201,7 +201,7 @@ def start_exercise(exercise, cap, window):
     timer = time.time()
     remaining_reps = exercise.reps
     animation_frame_list = AnimatedSprite.loadGIF(exercise.image_url)
-    animated_sprite = AnimatedSprite(75, Utils.height, animation_frame_list)
+    animated_sprite = AnimatedSprite(150, Utils.height, animation_frame_list)
     all_sprites = pygame.sprite.Group(animated_sprite)
 
     last_print_time = time.time()
@@ -260,8 +260,8 @@ def main():
                     pygame.quit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                     print('Loading exercise...')
-                    exercise = Exercise("Elbow bends", "./Resources/Woman doing Side Lunges.gif",
-                                        False, True, True,
+                    exercise = Exercise("Elbow bends", "Resources/left_side_lunges_300.gif",
+                                        False, True, False,
                                         5, 30.0,
                                         body,
                                         conditions.left_elbow_bend)
@@ -274,7 +274,7 @@ def main():
             pygame.display.flip()
     finally:
         cap.release()
-        cv2.destroyAllWindows()
+        exit()
 
 
 if __name__ == "__main__":
