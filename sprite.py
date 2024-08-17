@@ -18,11 +18,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
     @staticmethod
     def loadGIF(filename):
-        pilImage = Image.open(filename)
+        pil_image = Image.open(filename)
         frames = []
-        for frame in ImageSequence.Iterator(pilImage):
+        for frame in ImageSequence.Iterator(pil_image):
             frame = frame.convert('RGBA')
-            pygameImage = pygame.image.fromstring(
+            pygame_image = pygame.image.fromstring(
                 frame.tobytes(), frame.size, frame.mode).convert()
-            frames.append(pygameImage)
+            frames.append(pygame_image)
         return frames

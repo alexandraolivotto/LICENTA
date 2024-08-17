@@ -105,9 +105,83 @@ def get_key_points(input_image):
     return keypoints_with_scores
 
 
+def draw_get_in_frame_border(window, is_standing):
+    if window is None:
+        raise ValueError("Window is None")
+
+    # Standing position frame
+    standing_rect_origin_x, standing_rect_origin_y = 240, 50
+    standing_rect_width, standing_rect_height = 800, 924
+
+    # Laying position frame
+    laying_rect_origin_x, laying_rect_origin_y = 50, 150
+    laying_rect_width, laying_rect_height = 1180, 724
+
+    if is_standing:
+        standing_rect_sizes = (standing_rect_origin_x, standing_rect_origin_y,
+                               standing_rect_width, standing_rect_height)
+        pygame.draw.rect(window, (221, 221, 221, 70), standing_rect_sizes, 4,
+                         border_radius=20)
+    else:
+        laying_rect_sizes = (laying_rect_origin_x, laying_rect_origin_y,
+                             laying_rect_width, laying_rect_height)
+        pygame.draw.rect(window, (221, 221, 221, 70), laying_rect_sizes, 4,
+                         border_radius=20)
+
+    return window
+
+
+def check_if_body_in_frame(body, is_standing):
+    if body is None:
+        return False
+    # print(f' Nose: {body.nose}')
+    # print(f' Right heel: {body.right_heel}')
+    # print(f' Left heel: {body.left_heel}')
+    if is_standing:
+        if (0.4 < body.nose[0] < 0.6 and 0.05 < body.nose[1] < 0.2
+                and 0.4 < body.right_heel[0] < 0.6 and 0.8 < body.right_heel[1] < 0.9
+                and 0.4 < body.left_heel[0] < 0.7 and 0.8 < body.left_heel[1] < 0.9):
+            return True
+    else:
+        if (0.1 < body.nose[0] < 0.3 and 0.2 < body.nose[1] < 0.5
+                and 0.6 < body.right_heel[0] < 0.75
+                and 0.6 < body.right_heel[1] < 0.8):
+            return True
+
+    return False
+
+
+def wait_for_body_in_frame(cap, window, is_standing):
+    countdown = 3
+    last_decrement_time = time.time()
+
+    while countdown > -1:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                return False
+
+        body = get_body_and_display_frame(cap, window)
+        draw_get_in_frame_border(window, is_standing)
+
+        # Update the display
+        pygame.display.flip()
+
+        # Start countdown if body is in frame
+        current_time = time.time()
+        is_body_in_frame = check_if_body_in_frame(body, is_standing)
+        if is_body_in_frame and current_time - last_decrement_time >= 1:
+            countdown -= 1
+            last_decrement_time = current_time
+            print(f'Countdown: {countdown}')
+        elif not is_body_in_frame:
+            countdown = 3
+
+    return True
+
+
 def get_body_and_display_frame(cap, window):
     frame, body = build_frame_and_body(cap)
-
+    # print(body.)
     # Uncomment to display angles
     Utils.display_angles(frame, body)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -156,6 +230,8 @@ def start_exercise(exercise, cap, window):
         all_sprites.update()
         all_sprites.draw(window)
         pygame.display.flip()
+    print('Time up!')
+    return
 
 
 def main():
@@ -185,12 +261,14 @@ def main():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                     print('Loading exercise...')
                     exercise = Exercise("Elbow bends", "./Resources/Woman doing Side Lunges.gif",
-                                        False, True, 5, 30.0,
+                                        False, True, True,
+                                        5, 30.0,
                                         body,
                                         conditions.left_elbow_bend_condition)
+                    if not wait_for_body_in_frame(cap, window, exercise.is_standing):
+                        continue
                     print(f'Starting exercise: {exercise.name}')
-                    print(
-                        f'You have {exercise.elapsed_time} seconds to complete {exercise.reps} reps')
+                    print(f'You have {exercise.elapsed_time} seconds to complete {exercise.reps} reps')
                     start_exercise(exercise, cap, window)
 
             pygame.display.flip()
