@@ -264,7 +264,7 @@ def main():
                                         False, True, True,
                                         5, 30.0,
                                         body,
-                                        conditions.left_elbow_bend_condition)
+                                        conditions.left_elbow_bend)
                     if not wait_for_body_in_frame(cap, window, exercise.is_standing):
                         continue
                     print(f'Starting exercise: {exercise.name}')

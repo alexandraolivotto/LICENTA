@@ -14,19 +14,19 @@ def verify_rep(percentage, direction):
     return False, direction
 
 
-def left_side_lunge_condition(body, direction):
+def left_side_lunge(body, direction):
     left_knee_percentage = np.interp(body.right_knee_angle, (100, 170), (100, 0)) * 0.80
     right_knee_percentage = np.interp(body.left_knee_angle, (174, 177), (100, 0)) * 0.20
     percentage = int(left_knee_percentage + right_knee_percentage)
     return verify_rep(percentage, direction)
 
 
-def left_elbow_bend_condition(body, direction):
+def left_elbow_bend(body, direction):
     percentage = np.interp(body.right_elbow_angle, (90, 175), (0, 100))
     return verify_rep(percentage, direction)
 
 
-def crunches_condition(body, direction):
+def crunches(body, direction):
     percentage = np.interp(body.right_outer_hip_angle, (55, 145), (0, 100))
     return verify_rep(percentage, direction)
 
