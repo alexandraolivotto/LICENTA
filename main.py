@@ -134,18 +134,18 @@ def draw_get_in_frame_border(window, is_standing):
 def check_if_body_in_frame(body, is_standing):
     if body is None:
         return False
-    print(f' Nose: {body.nose}')
-    print(f' Right ankle: {body.right_ankle}')
-    print(f' Left ankle: {body.left_ankle}')
+    # print(f' Nose: {body.nose}')
+    # print(f' Right ankle: {body.right_ankle}')
+    # print(f' Left ankle: {body.left_ankle}')
     if is_standing:
         if (0.6 > body.nose[1] > 0.4 > body.nose[0] > 0.1
                 and 0.4 < body.right_ankle[1] < 0.6 and 0.9 > body.right_ankle[0] > 0.7 > body.left_ankle[1] > 0.4
                 and 0.7 < body.left_ankle[0] < 0.9):
             return True
     else:
-        if (0.2 < body.nose[0] < 0.8 and 0.2 < body.nose[1] < 0.5
-                and 0.2 < body.right_ankle[0] < 0.8
-                and 0.6 < body.right_ankle[1] < 0.8):
+        if (0.1 < body.nose[1] < 0.9 and 0.3 < body.nose[0] < 0.8
+                and 0.1 < body.right_ankle[1] < 0.9
+                and 0.3 < body.right_ankle[0] < 0.8):
             return True
 
     return False
@@ -200,9 +200,9 @@ def get_body_and_display_frame(cap, window):
 def start_exercise(exercise, cap, window):
     timer = time.time()
     remaining_reps = exercise.reps
-    animation_frame_list = AnimatedSprite.loadGIF(exercise.image_url)
-    animated_sprite = AnimatedSprite(150, Utils.height, animation_frame_list)
-    all_sprites = pygame.sprite.Group(animated_sprite)
+    # animation_frame_list = AnimatedSprite.loadGIF(exercise.image_url)
+    # animated_sprite = AnimatedSprite(150, Utils.height, animation_frame_list)
+    # all_sprites = pygame.sprite.Group(animated_sprite)
 
     last_print_time = time.time()
     while time.time() - timer < exercise.elapsed_time:
@@ -227,8 +227,8 @@ def start_exercise(exercise, cap, window):
 
         exercise.direction = direction
 
-        all_sprites.update()
-        all_sprites.draw(window)
+        # all_sprites.update()
+        # all_sprites.draw(window)
         pygame.display.flip()
     print('Time up!')
     return
@@ -262,9 +262,9 @@ def main():
                     print('Loading exercise...')
                     exercise = Exercise("Elbow bends", "Resources/left_side_lunges_300.gif",
                                         False, True, False,
-                                        5, 30.0,
+                                        2, 30.0,
                                         body,
-                                        conditions.left_elbow_bend)
+                                        conditions.glute_kick_back)
                     if not wait_for_body_in_frame(cap, window, exercise.is_standing):
                         continue
                     print(f'Starting exercise: {exercise.name}')
