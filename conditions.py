@@ -156,6 +156,38 @@ def superman(body, direction):
     return verify_rep(percentage, direction)
 
 
+def donkey_kicks_pulse_left(body, direction):
+    right_outer_hip_percentage = np.interp(body.right_outer_hip_angle, (165, 175), (0, 100)) * 0.5
+    right_knee_percentage = np.interp(body.right_knee_angle, (85, 95), (100, 0)) * 0.5
+    percentage = int(right_outer_hip_percentage + right_knee_percentage)
+    return verify_rep(percentage, direction)
+
+
+def donkey_kicks_pulse_right(body, direction):
+    left_outer_hip_percentage = np.interp(body.left_outer_hip_angle, (165, 175), (0, 100)) * 0.5
+    left_knee_percentage = np.interp(body.left_knee_angle, (85, 95), (100, 0)) * 0.5
+    percentage = int(left_outer_hip_percentage + left_knee_percentage)
+    return verify_rep(percentage, direction)
+
+def glute_kick_back_pulse_left(body, direction):
+    right_outer_hip_percentage = np.interp(body.right_outer_hip_angle, (165, 175), (100, 0)) * 0.7
+    right_knee_percentage = np.interp(body.right_knee_angle, (170, 175), (0, 100)) * 0.3
+    percentage = int(right_outer_hip_percentage + right_knee_percentage)
+    return verify_rep(percentage, direction)
+
+def glute_kick_back_pulse_right(body, direction):
+    left_outer_hip_percentage = np.interp(body.left_outer_hip_angle, (165, 175), (100, 0)) * 0.7
+    left_knee_percentage = np.interp(body.left_knee_angle, (170, 175), (0, 100)) * 0.3
+    percentage = int(left_outer_hip_percentage + left_knee_percentage)
+    return verify_rep_double_sided_exercises(percentage, direction)
+
+def simple_jump(body, direction):
+    print(body.left_inner_hip_angle)
+    left_inner_hip_percentage = np.interp(body.left_inner_hip_angle, (80, 110), (0, 100)) * 0.5
+    right_inner_hip_percentage = np.interp(body.right_inner_hip_angle, (80, 110), (0, 100)) * 0.5
+    return verify_rep(int(left_inner_hip_percentage + right_inner_hip_percentage), direction)
+
+
 #double sided exercises
 
 
@@ -258,7 +290,19 @@ def leg_raise(body, direction):
     right_outer_hip_percentage = np.interp(body.right_outer_hip_angle, (90, 175), (100, 0))
     left_outer_hip_percentage = np.interp(body.left_outer_hip_angle, (90, 175), (100, 0))
     if direction < 2:
-        percentage = right_outer_hip_percentage
+        percentage = int(right_outer_hip_percentage)
     else:
-        percentage = left_outer_hip_percentage
+        percentage = int(left_outer_hip_percentage)
     return verify_rep_double_sided_exercises(percentage, direction)
+
+def flutter_kicks(body, direction):
+    right_outer_hip_percentage = np.interp(body.right_outer_hip_angle, (130, 160), (100, 0)) * 0.5
+    right_knee_percentage = np.interp(body.right_knee_angle, (170, 175), (0, 100)) * 0.5
+    left_outer_hip_percentage = np.interp(body.left_outer_hip_angle, (130, 160), (100, 0)) * 0.5
+    left_knee_percentage = np.interp(body.left_knee_angle, (170, 175), (0, 100)) * 0.5
+    if direction < 2:
+        percentage = int(right_outer_hip_percentage + right_knee_percentage)
+    else:
+        percentage = int(left_outer_hip_percentage + left_knee_percentage)
+    return verify_rep_double_sided_exercises(percentage, direction)
+
